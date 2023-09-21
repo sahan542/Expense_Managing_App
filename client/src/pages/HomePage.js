@@ -1,12 +1,14 @@
 import React, {useState,useEffect} from 'react';
 import {Modal, Select, Form ,message, Table, DatePicker} from 'antd';
 import {  Input } from 'antd';
+import {UnorderedListOutlined, AreaChartOutlined} from '@ant-design/icons';
 //import Layout from "./../components/Layout/Layout";
 import axios from 'axios';
 import Spinner from '../components/Spinner';
-import { Header } from '../components/Layout/Header';
-import { Footer } from '../components/Layout/Footer';
+import Header from '../components/Layout/Header';
+import Footer from '../components/Layout/Footer';
 import moment from 'moment';
+import Analytics from '../components/Analytics';
 
 const { RangePicker } = DatePicker;
 
@@ -17,6 +19,7 @@ const HomePage = () => {
   const[frequency,setFrequency] = useState('7');
   const[selectedDate, setSelectedate] = useState([]);
   const[type,setType] = useState('all');
+  const [viewData,setViewData] = useState('table');
 
   //table data
   const columns = [
@@ -57,6 +60,7 @@ const HomePage = () => {
     try{
       const user = JSON.parse(localStorage.getItem('user'));
       setLoading(true);
+      setLoading(false);
       const res = await axios.post('/transections/get-transection', {
               userid: user._id,
               frequency,
@@ -82,6 +86,7 @@ const HomePage = () => {
       try{
           const user = JSON.parse(localStorage.getItem('user'));
           setLoading(true);
+
           await axios.post('/transections/add-transection', {...values, userid:user._id});
           setLoading(false);
           message.success("Transection Added Successfully");
@@ -101,7 +106,7 @@ const HomePage = () => {
 
         <div className='filters'>
             <div>
-              <h6>Select Freequency</h6>
+              <h6>Select Frequency</h6>
               <Select value={frequency} onChange={(values) => setFrequency(values) }>
                 <Select.Option value='7'>LAST 1 week</Select.Option>
                 <Select.Option value='30'>LAST 1 Month</Select.Option>
@@ -130,10 +135,17 @@ const HomePage = () => {
                     )}
             </div>
                 <div>
+                  <div className='switch-icons'>
+                    <UnorderedListOutlined className={`mx-2 ${viewData === 'table' ? 'active-icon' : 'inactive-icon'}'} onClick={() => setViewData('table')}`} />
+                    <AreaChartOutlined className={`mx-2 ${viewData === 'analytics' ? 'active-icon' : 'inactive-icon'}'} onClick={() => setViewData('analytics')}`} />
+
+                  </div>
                   <button className='btn btn-primary' onClick={() => setShowModal(true)}>Add New</button>
                 </div>
         </div>
         <div className='content'>
+          {viewData == 'table' ? <Table columns={columns} dataSource={allTransection} /> 
+          : <Analytics allTransection={allTransection} />}
           <Table columns={columns} dataSource={allTransection}/>
         </div>
         <Modal 
@@ -182,7 +194,6 @@ const HomePage = () => {
 
 
         </Modal>
-        <Footer />
         <Footer />
     </>
   )

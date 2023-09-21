@@ -3,7 +3,7 @@ const moment = require('moment')
 
 const getAllTransection = async (req,res) => {
     try{
-        const {frequency} = req.body
+        const {frequency, selectedDate ,type} = req.body;
         const transection = await transectionModel.find({
             ...(frequency !== 'custom' ? {
                 date: {
@@ -14,9 +14,10 @@ const getAllTransection = async (req,res) => {
                 $gte: selectedDate[0],
                 $lte: selectedDate[1],
 
-              }
-            })
+              },
+            }),
             userid: req.body.userid,
+            ...(type !== 'all' && {type})
             });
         res.status(200).json(transection);
     }
