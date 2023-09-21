@@ -142,6 +142,7 @@ const HomePage = () => {
 
         </Modal>
         <Footer />
+        <Footer />
     </>
   )
 }
