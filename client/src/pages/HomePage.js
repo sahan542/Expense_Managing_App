@@ -1,23 +1,29 @@
 import React, {useState,useEffect} from 'react';
-import {Modal, Select, Form ,message, Table} from 'antd';
+import {Modal, Select, Form ,message, Table, DatePicker} from 'antd';
 import {  Input } from 'antd';
 //import Layout from "./../components/Layout/Layout";
 import axios from 'axios';
 import Spinner from '../components/Spinner';
-import { Footer, Header } from 'antd/es/layout/layout';
+import { Header } from '../components/Layout/Header';
+import { Footer } from '../components/Layout/Footer';
+import moment from 'moment';
 
-
+const { RangePicker } = DatePicker;
 
 const HomePage = () => {
   const[showModal,setShowModal] = useState(false);
   const[loading,setLoading] = useState(false);
   const[allTransection , setAllTransection] = useState([]);
+  const[frequency,setFrequency] = useState('7');
+  const[selectedDate, setSelectedate] = useState([]);
+  const[type,setType] = useState('all');
 
   //table data
   const columns = [
     {
       title: "Date",
-      dataIndex: "date"
+      dataIndex: "date",
+      render : (text) => <span>{moment(text).format('YYYY-MM-DD')}</span>
     },
     {
       title: "Amount",
@@ -42,12 +48,22 @@ const HomePage = () => {
 
   ]
 
-  //getall transaction
+ 
+
+  //useEffect Hook
+  useEffect(() => {
+     //getall transaction
   const getAllTransections = async () => {
     try{
       const user = JSON.parse(localStorage.getItem('user'));
       setLoading(true);
-      const res = await axios.post('/transections/get-transection', {userid: user._id});
+      const res = await axios.post('/transections/get-transection', {
+              userid: user._id,
+              frequency,
+              selectedDate,
+              type
+              
+              });
       setLoading(false);
       setAllTransection(res.data);
       console.log(res.data);
@@ -58,11 +74,8 @@ const HomePage = () => {
 
     }
   };
-
-  //useEffect Hook
-  useEffect(() => {
     getAllTransections();
-  }, []);
+  }, [frequency,selectedDate ,type]);
 
   //form handling
   const handleSubmit = async(values) => {
@@ -87,7 +100,35 @@ const HomePage = () => {
     {loading && <Spinner />}
 
         <div className='filters'>
-            <div>range filters</div>
+            <div>
+              <h6>Select Freequency</h6>
+              <Select value={frequency} onChange={(values) => setFrequency(values) }>
+                <Select.Option value='7'>LAST 1 week</Select.Option>
+                <Select.Option value='30'>LAST 1 Month</Select.Option>
+                <Select.Option value='365'>LAST 1 Year</Select.Option>
+                <Select.Option value='custom'>Custom</Select.Option>
+              </Select>
+              {frequency === 'custom' && (
+                 <RangePicker 
+                    value={selectedDate} 
+                    onChange={ (values) => setSelectedate(values)}
+                    />
+                    )}
+            </div>
+            <div>
+              <h6>Select Type</h6>
+              <Select value={type} onChange={(values) => setFrequency(values) }>
+                <Select.Option value='all'>ALL</Select.Option>
+                <Select.Option value='income'>INCOME</Select.Option>
+                <Select.Option value='expense'>EXPENSE</Select.Option>
+              </Select>
+              {frequency === 'custom' && (
+                 <RangePicker 
+                    value={selectedDate} 
+                    onChange={ (values) => setSelectedate(values)}
+                    />
+                    )}
+            </div>
                 <div>
                   <button className='btn btn-primary' onClick={() => setShowModal(true)}>Add New</button>
                 </div>
